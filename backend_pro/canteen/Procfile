@@ -1,2 +1,2 @@
-web: gunicorn canteen.wsgi --log-file -
+web: gunicorn canteens.wsgi --log-file -
 release: python manage.py migrate
