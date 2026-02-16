@@ -1,0 +1,297 @@
+### Canteen Management System - API Examples
+### Use with REST Client extension in VS Code or import to Postman
+
+@baseUrl = http://localhost:8000/api
+@studentToken = YOUR_STUDENT_TOKEN_HERE
+@adminToken = YOUR_ADMIN_TOKEN_HERE
+@superAdminToken = YOUR_SUPERADMIN_TOKEN_HERE
+
+### ============================================
+### AUTHENTICATION
+### ============================================
+
+### Register Student
+POST {{baseUrl}}/auth/register/
+Content-Type: application/json
+
+{
+  "username": "newstudent",
+  "email": "newstudent@college.com",
+  "password": "student123",
+  "first_name": "New",
+  "last_name": "Student",
+  "phone": "9876543210",
+  "role": "student"
+}
+
+### Login Student
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "student123"
+}
+
+### Login Food Court Admin
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "cafeteria_admin",
+  "password": "admin123"
+}
+
+### Login Super Admin
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "superadmin",
+  "password": "admin123"
+}
+
+### Get Profile
+GET {{baseUrl}}/auth/profile/
+Authorization: Bearer {{studentToken}}
+
+### Refresh Token
+POST {{baseUrl}}/auth/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "YOUR_REFRESH_TOKEN"
+}
+
+### ============================================
+### STUDENT ENDPOINTS
+### ============================================
+
+### Get All Food Courts (with estimated waiting time)
+GET {{baseUrl}}/food-courts/
+Authorization: Bearer {{studentToken}}
+
+### Get Food Court Details with Menu
+GET {{baseUrl}}/food-courts/1/
+Authorization: Bearer {{studentToken}}
+
+### Place Order
+POST {{baseUrl}}/student/orders/place/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "food_court": 1,
+  "items": [
+    {
+      "menu_item_id": 1,
+      "quantity": 2
+    },
+    {
+      "menu_item_id": 3,
+      "quantity": 1
+    }
+  ]
+}
+
+### Get My Orders
+GET {{baseUrl}}/student/orders/
+Authorization: Bearer {{studentToken}}
+
+### Get Order Details
+GET {{baseUrl}}/student/orders/1/
+Authorization: Bearer {{studentToken}}
+
+### Get Wallet Balance
+GET {{baseUrl}}/student/wallet/balance/
+Authorization: Bearer {{studentToken}}
+
+### Add Money to Wallet
+POST {{baseUrl}}/student/wallet/add/
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+  "amount": "500.00"
+}
+
+### Get Wallet Transaction History
+GET {{baseUrl}}/student/wallet/transactions/
+Authorization: Bearer {{studentToken}}
+
+### ============================================
+### FOOD COURT ADMIN ENDPOINTS
+### ============================================
+
+### Get My Food Court
+GET {{baseUrl}}/admin/food-court/
+Authorization: Bearer {{adminToken}}
+
+### Update Food Court Settings
+PATCH {{baseUrl}}/admin/food-court/update/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "is_open": true,
+  "avg_preparation_time": 20,
+  "active_staff_count": 4,
+  "description": "Updated description"
+}
+
+### Get All Menu Items
+GET {{baseUrl}}/admin/menu-items/
+Authorization: Bearer {{adminToken}}
+
+### Add Menu Item
+POST {{baseUrl}}/admin/menu-items/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "New Dish",
+  "description": "Delicious new dish",
+  "price": "150.00",
+  "category": "Special",
+  "is_available": true,
+  "food_court": 1
+}
+
+### Update Menu Item
+PATCH {{baseUrl}}/admin/menu-items/1/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "price": "160.00",
+  "is_available": false
+}
+
+### Delete Menu Item
+DELETE {{baseUrl}}/admin/menu-items/1/
+Authorization: Bearer {{adminToken}}
+
+### Get All Orders
+GET {{baseUrl}}/admin/orders/
+Authorization: Bearer {{adminToken}}
+
+### Update Order Status
+PATCH {{baseUrl}}/admin/orders/1/status/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "preparing"
+}
+
+### Update Order to Ready
+PATCH {{baseUrl}}/admin/orders/1/status/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "ready"
+}
+
+### Update Order to Completed
+PATCH {{baseUrl}}/admin/orders/1/status/
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Get Admin Analytics
+GET {{baseUrl}}/admin/analytics/
+Authorization: Bearer {{adminToken}}
+
+### ============================================
+### SUPER ADMIN ENDPOINTS
+### ============================================
+
+### Get All Food Courts
+GET {{baseUrl}}/superadmin/food-courts/
+Authorization: Bearer {{superAdminToken}}
+
+### Create Food Court
+POST {{baseUrl}}/superadmin/food-courts/create/
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "name": "South Campus Canteen",
+  "description": "Food court at south campus",
+  "admin": 3,
+  "is_open": true,
+  "avg_preparation_time": 15,
+  "active_staff_count": 2
+}
+
+### Create Food Court Admin
+POST {{baseUrl}}/superadmin/admins/create/
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "username": "newadmin",
+  "email": "newadmin@canteen.com",
+  "password": "admin123",
+  "first_name": "New",
+  "last_name": "Admin"
+}
+
+### Get All Users
+GET {{baseUrl}}/superadmin/users/
+Authorization: Bearer {{superAdminToken}}
+
+### Block User
+PATCH {{baseUrl}}/superadmin/users/5/block/
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "is_blocked": true
+}
+
+### Unblock User
+PATCH {{baseUrl}}/superadmin/users/5/block/
+Authorization: Bearer {{superAdminToken}}
+Content-Type: application/json
+
+{
+  "is_blocked": false
+}
+
+### Get System Analytics
+GET {{baseUrl}}/superadmin/analytics/
+Authorization: Bearer {{superAdminToken}}
+
+### ============================================
+### TESTING SCENARIOS
+### ============================================
+
+### Scenario 1: Student Orders Food
+# 1. Login as student
+# 2. Check wallet balance
+# 3. View food courts
+# 4. View menu of a food court
+# 5. Place order
+# 6. Check wallet balance again
+# 7. View order status
+
+### Scenario 2: Admin Manages Orders
+# 1. Login as food court admin
+# 2. View incoming orders
+# 3. Update order status to "preparing"
+# 4. Update order status to "ready"
+# 5. Update order status to "completed"
+# 6. Check analytics
+
+### Scenario 3: Super Admin Management
+# 1. Login as super admin
+# 2. Create new food court
+# 3. Create food court admin
+# 4. Assign admin to food court
+# 5. View system analytics
+# 6. Block/unblock users

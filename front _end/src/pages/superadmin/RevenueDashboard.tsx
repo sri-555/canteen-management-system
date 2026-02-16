@@ -1,0 +1,398 @@
+import React, { Children } from 'react';
+import { Card } from '../../components/ui/Card';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area } from
+'recharts';
+import {
+  DollarSign,
+  ShoppingBag,
+  Users,
+  Store,
+  TrendingUp,
+  TrendingDown } from
+'lucide-react';
+import { motion } from 'framer-motion';
+const revenueData = [
+{
+  name: 'Mon',
+  revenue: 4200
+},
+{
+  name: 'Tue',
+  revenue: 3800
+},
+{
+  name: 'Wed',
+  revenue: 5100
+},
+{
+  name: 'Thu',
+  revenue: 4900
+},
+{
+  name: 'Fri',
+  revenue: 6200
+},
+{
+  name: 'Sat',
+  revenue: 7800
+},
+{
+  name: 'Sun',
+  revenue: 7100
+}];
+
+const foodCourtData = [
+{
+  name: 'Burger & Co.',
+  revenue: 12500
+},
+{
+  name: 'Sushi Zen',
+  revenue: 9800
+},
+{
+  name: 'Taco Fiesta',
+  revenue: 8400
+},
+{
+  name: 'Green Bowl',
+  revenue: 6200
+},
+{
+  name: 'Pizza Palace',
+  revenue: 5100
+},
+{
+  name: 'Chai Corner',
+  revenue: 3200
+}];
+
+const topFoodCourts = [
+{
+  name: 'Burger & Co.',
+  orders: 1245,
+  revenue: 12500,
+  growth: 12.5
+},
+{
+  name: 'Sushi Zen',
+  orders: 892,
+  revenue: 9800,
+  growth: 8.2
+},
+{
+  name: 'Taco Fiesta',
+  orders: 756,
+  revenue: 8400,
+  growth: -2.4
+},
+{
+  name: 'Green Bowl',
+  orders: 543,
+  revenue: 6200,
+  growth: 15.8
+}];
+
+export function RevenueDashboard() {
+  const containerVariants = {
+    hidden: {
+      opacity: 0
+    },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: 20
+    },
+    show: {
+      opacity: 1,
+      y: 0
+    }
+  };
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-8">
+
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Revenue Dashboard</h1>
+        <div className="text-sm text-gray-500">Last updated: Just now</div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+        {
+          label: 'Total Revenue',
+          value: '$48,250',
+          trend: '+12.5%',
+          trendUp: true,
+          icon: DollarSign,
+          color: 'text-green-600',
+          bg: 'bg-green-50'
+        },
+        {
+          label: 'Total Orders',
+          value: '3,847',
+          trend: '+8.2%',
+          trendUp: true,
+          icon: ShoppingBag,
+          color: 'text-blue-600',
+          bg: 'bg-blue-50'
+        },
+        {
+          label: 'Active Food Courts',
+          value: '6',
+          trend: '0%',
+          trendUp: true,
+          icon: Store,
+          color: 'text-purple-600',
+          bg: 'bg-purple-50'
+        },
+        {
+          label: 'Active Users',
+          value: '892',
+          trend: '+24 this week',
+          trendUp: true,
+          icon: Users,
+          color: 'text-indigo-600',
+          bg: 'bg-indigo-50'
+        }].
+        map((stat, i) =>
+        <motion.div key={i} variants={itemVariants}>
+            <Card className="p-6 h-full">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    {stat.label}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
+                    {stat.value}
+                  </p>
+                  <div
+                  className={`flex items-center mt-2 text-xs font-medium ${stat.trendUp ? 'text-green-600' : 'text-red-600'}`}>
+
+                    {stat.trendUp ?
+                  <TrendingUp className="w-3 h-3 mr-1" /> :
+
+                  <TrendingDown className="w-3 h-3 mr-1" />
+                  }
+                    {stat.trend}
+                  </div>
+                </div>
+                <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
+                  <stat.icon className="w-6 h-6" />
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={itemVariants}>
+          <Card className="p-6 h-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">
+              Revenue Trend
+            </h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData}>
+                  <defs>
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1">
+
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f3f4f6" />
+
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{
+                      fill: '#6b7280',
+                      fontSize: 12
+                    }}
+                    dy={10} />
+
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{
+                      fill: '#6b7280',
+                      fontSize: 12
+                    }}
+                    prefix="$" />
+
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: '8px',
+                      border: 'none',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                    formatter={(value: number) => [`$${value}`, 'Revenue']} />
+
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#8b5cf6"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)" />
+
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <Card className="p-6 h-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">
+              Revenue by Food Court
+            </h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={foodCourtData} layout="vertical">
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    horizontal={true}
+                    vertical={false}
+                    stroke="#f3f4f6" />
+
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    axisLine={false}
+                    tickLine={false}
+                    width={100}
+                    tick={{
+                      fill: '#6b7280',
+                      fontSize: 12
+                    }} />
+
+                  <Tooltip
+                    cursor={{
+                      fill: '#f9fafb'
+                    }}
+                    contentStyle={{
+                      borderRadius: '8px',
+                      border: 'none',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                    formatter={(value: number) => [`$${value}`, 'Revenue']} />
+
+                  <Bar
+                    dataKey="revenue"
+                    fill="#4f46e5"
+                    radius={[0, 4, 4, 0]}
+                    barSize={32} />
+
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Top Performing Food Courts */}
+      <motion.div variants={itemVariants}>
+        <Card className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">
+            Top Performing Food Courts
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-4">
+                    Food Court
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-4">
+                    Orders
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-4">
+                    Revenue
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-4">
+                    Growth
+                  </th>
+                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider pb-4 w-1/3">
+                    Performance
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {topFoodCourts.map((court, i) =>
+                <tr
+                  key={i}
+                  className="group hover:bg-gray-50 transition-colors">
+
+                    <td className="py-4 text-sm font-medium text-gray-900">
+                      {court.name}
+                    </td>
+                    <td className="py-4 text-sm text-gray-600">
+                      {court.orders}
+                    </td>
+                    <td className="py-4 text-sm font-medium text-gray-900">
+                      ${court.revenue.toLocaleString()}
+                    </td>
+                    <td className="py-4 text-sm">
+                      <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${court.growth > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+
+                        {court.growth > 0 ? '+' : ''}
+                        {court.growth}%
+                      </span>
+                    </td>
+                    <td className="py-4">
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div
+                        className="bg-indigo-600 h-2 rounded-full"
+                        style={{
+                          width: `${court.revenue / 15000 * 100}%`
+                        }} />
+
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </motion.div>
+    </motion.div>);
+
+}
