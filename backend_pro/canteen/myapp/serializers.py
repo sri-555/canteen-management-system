@@ -6,8 +6,8 @@ from decimal import Decimal
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'wallet_balance', 'phone', 'is_blocked']
-        read_only_fields = ['wallet_balance', 'is_blocked']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'wallet_balance', 'phone', 'is_blocked', 'date_joined']
+        read_only_fields = ['wallet_balance', 'is_blocked', 'date_joined']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)

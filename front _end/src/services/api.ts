@@ -269,6 +269,12 @@ export const api = {
         body: JSON.stringify({ admin_id: adminId }),
       }),
     
+    updateFoodCourtStatus: (foodCourtId: number, isOpen: boolean) =>
+      apiFetch(`/superadmin/food-courts/${foodCourtId}/update-status/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_open: isOpen }),
+      }),
+    
     // Admins
     createFoodCourtAdmin: (data: {
       username: string;

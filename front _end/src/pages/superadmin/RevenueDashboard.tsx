@@ -1,4 +1,4 @@
-import React, { Children } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../../components/ui/Card';
 import {
   BarChart,
@@ -8,20 +8,19 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   AreaChart,
-  Area } from
-'recharts';
+  Area
+} from 'recharts';
 import {
   DollarSign,
   ShoppingBag,
   Users,
   Store,
   TrendingUp,
-  TrendingDown } from
-'lucide-react';
+  TrendingDown
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import api from '../../services/api';
 const revenueData = [
 {
   name: 'Mon',
@@ -52,59 +51,35 @@ const revenueData = [
   revenue: 7100
 }];
 
-const foodCourtData = [
-{
-  name: 'Burger & Co.',
-  revenue: 12500
-},
-{
-  name: 'Sushi Zen',
-  revenue: 9800
-},
-{
-  name: 'Taco Fiesta',
-  revenue: 8400
-},
-{
-  name: 'Green Bowl',
-  revenue: 6200
-},
-{
-  name: 'Pizza Palace',
-  revenue: 5100
-},
-{
-  name: 'Chai Corner',
-  revenue: 3200
-}];
-
-const topFoodCourts = [
-{
-  name: 'Burger & Co.',
-  orders: 1245,
-  revenue: 12500,
-  growth: 12.5
-},
-{
-  name: 'Sushi Zen',
-  orders: 892,
-  revenue: 9800,
-  growth: 8.2
-},
-{
-  name: 'Taco Fiesta',
-  orders: 756,
-  revenue: 8400,
-  growth: -2.4
-},
-{
-  name: 'Green Bowl',
-  orders: 543,
-  revenue: 6200,
-  growth: 15.8
-}];
-
 export function RevenueDashboard() {
+  const [analytics, setAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const analyticsData = await api.superAdmin.getSystemAnalytics() as any;
+      setAnalytics(analyticsData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+
+  // Generate chart data from real food courts with revenue
+  const foodCourtData = analytics?.food_court_revenue?.slice(0, 6).map((court: any) => ({
+    name: court.name,
+    revenue: court.revenue
+  })) || [];
+
+  const topFoodCourts = analytics?.food_court_revenue?.map((court: any) => ({
+    name: court.name,
+    orders: court.orders,
+    revenue: court.revenue,
+    growth: court.growth || 0
+  })) || [];
+
   const containerVariants = {
     hidden: {
       opacity: 0
@@ -143,8 +118,8 @@ export function RevenueDashboard() {
         {[
         {
           label: 'Total Revenue',
-          value: '$48,250',
-          trend: '+12.5%',
+          value: analytics ? `₹${parseFloat(analytics.total_revenue || 0).toLocaleString()}` : '₹0',
+          trend: analytics?.today_revenue ? `₹${parseFloat(analytics.today_revenue).toFixed(2)} today` : '₹0 today',
           trendUp: true,
           icon: DollarSign,
           color: 'text-green-600',
@@ -152,8 +127,8 @@ export function RevenueDashboard() {
         },
         {
           label: 'Total Orders',
-          value: '3,847',
-          trend: '+8.2%',
+          value: analytics ? analytics.total_orders.toLocaleString() : '0',
+          trend: 'All time',
           trendUp: true,
           icon: ShoppingBag,
           color: 'text-blue-600',
@@ -161,17 +136,17 @@ export function RevenueDashboard() {
         },
         {
           label: 'Active Food Courts',
-          value: '6',
-          trend: '0%',
+          value: analytics ? analytics.total_food_courts.toString() : '0',
+          trend: 'Total courts',
           trendUp: true,
           icon: Store,
           color: 'text-purple-600',
           bg: 'bg-purple-50'
         },
         {
-          label: 'Active Users',
-          value: '892',
-          trend: '+24 this week',
+          label: 'Total Students',
+          value: analytics ? analytics.total_students.toLocaleString() : '0',
+          trend: 'Registered users',
           trendUp: true,
           icon: Users,
           color: 'text-indigo-600',
@@ -252,7 +227,8 @@ export function RevenueDashboard() {
                       fill: '#6b7280',
                       fontSize: 12
                     }}
-                    prefix="$" />
+                    tickFormatter={(value) => `₹${value}`}
+                  />
 
                   <Tooltip
                     contentStyle={{
@@ -260,7 +236,7 @@ export function RevenueDashboard() {
                       border: 'none',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                     }}
-                    formatter={(value: number) => [`$${value}`, 'Revenue']} />
+                    formatter={(value: number) => [`₹${value}`, 'Revenue']} />
 
                   <Area
                     type="monotone"
@@ -311,7 +287,7 @@ export function RevenueDashboard() {
                       border: 'none',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                     }}
-                    formatter={(value: number) => [`$${value}`, 'Revenue']} />
+                    formatter={(value: number) => [`₹${value}`, 'Revenue']} />
 
                   <Bar
                     dataKey="revenue"
@@ -354,11 +330,11 @@ export function RevenueDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {topFoodCourts.map((court, i) =>
-                <tr
-                  key={i}
-                  className="group hover:bg-gray-50 transition-colors">
-
+                {topFoodCourts.map((court: any, i: number) => (
+                  <tr
+                    key={i}
+                    className="group hover:bg-gray-50 transition-colors"
+                  >
                     <td className="py-4 text-sm font-medium text-gray-900">
                       {court.name}
                     </td>
@@ -366,7 +342,7 @@ export function RevenueDashboard() {
                       {court.orders}
                     </td>
                     <td className="py-4 text-sm font-medium text-gray-900">
-                      ${court.revenue.toLocaleString()}
+                      ₹{court.revenue.toLocaleString()}
                     </td>
                     <td className="py-4 text-sm">
                       <span
@@ -382,12 +358,12 @@ export function RevenueDashboard() {
                         className="bg-indigo-600 h-2 rounded-full"
                         style={{
                           width: `${court.revenue / 15000 * 100}%`
-                        }} />
-
+                        }}
+                      />
                       </div>
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>

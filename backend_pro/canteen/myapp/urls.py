@@ -32,9 +32,12 @@ urlpatterns = [
     path('superadmin/food-courts/', views.all_food_courts, name='all-food-courts'),
     path('superadmin/food-courts/create/', views.create_food_court, name='create-food-court'),
     path('superadmin/food-courts/<int:food_court_id>/update-admin/', views.update_food_court_admin, name='update-food-court-admin'),
+    path('superadmin/food-courts/<int:food_court_id>/update-status/', views.update_food_court_status, name='update-food-court-status'),
     path('superadmin/admins/create/', views.create_food_court_admin, name='create-food-court-admin'),
     path('superadmin/users/', views.all_users, name='all-users'),
     path('superadmin/users/<int:user_id>/block/', views.block_user, name='block-user'),
+    path('superadmin/users/<int:user_id>/update/', views.update_user, name='update-user'),
+    path('superadmin/users/<int:user_id>/delete/', views.delete_user, name='delete-user'),
     path('superadmin/analytics/', views.system_analytics, name='system-analytics'),
     
     # Router URLs

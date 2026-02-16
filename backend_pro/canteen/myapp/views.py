@@ -377,6 +377,23 @@ def update_food_court_admin(request, food_court_id):
     except FoodCourt.DoesNotExist:
         return Response({'error': 'Food court not found'}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['PATCH'])
+@permission_classes([IsSuperAdmin])
+def update_food_court_status(request, food_court_id):
+    try:
+        food_court = FoodCourt.objects.get(id=food_court_id)
+        is_open = request.data.get('is_open')
+        
+        if is_open is None:
+            return Response({'error': 'is_open is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        food_court.is_open = is_open
+        food_court.save()
+        
+        return Response(FoodCourtSerializer(food_court).data)
+    except FoodCourt.DoesNotExist:
+        return Response({'error': 'Food court not found'}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(['POST'])
 @permission_classes([IsSuperAdmin])
 def create_food_court_admin(request):
@@ -406,6 +423,51 @@ def block_user(request, user_id):
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['PATCH'])
+@permission_classes([IsSuperAdmin])
+def update_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        
+        # Update allowed fields
+        if 'first_name' in request.data:
+            user.first_name = request.data['first_name']
+        if 'last_name' in request.data:
+            user.last_name = request.data['last_name']
+        if 'email' in request.data:
+            user.email = request.data['email']
+        if 'phone' in request.data:
+            user.phone = request.data['phone']
+        if 'is_blocked' in request.data:
+            user.is_blocked = request.data['is_blocked']
+        if 'wallet_balance' in request.data and user.role == 'student':
+            user.wallet_balance = Decimal(request.data['wallet_balance'])
+        
+        user.save()
+        return Response(UserSerializer(user).data)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsSuperAdmin])
+def delete_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        
+        # Prevent deleting yourself
+        if user.id == request.user.id:
+            return Response({'error': 'Cannot delete your own account'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Prevent deleting super admins
+        if user.role == 'super_admin':
+            return Response({'error': 'Cannot delete super admin accounts'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        username = user.username
+        user.delete()
+        return Response({'message': f'User {username} deleted successfully'})
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(['GET'])
 @permission_classes([IsSuperAdmin])
 def system_analytics(request):
@@ -418,15 +480,64 @@ def system_analytics(request):
     total_food_courts = FoodCourt.objects.count()
     
     today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
+    
     today_revenue = Order.objects.filter(
         created_at__date=today,
         status__in=['completed', 'ready', 'preparing', 'pending']
     ).aggregate(total=Sum('total_amount'))['total'] or 0
+    
+    # Revenue by food court
+    food_court_revenue = []
+    for food_court in FoodCourt.objects.all():
+        # Total revenue
+        revenue = Order.objects.filter(
+            food_court=food_court,
+            status__in=['completed', 'ready', 'preparing', 'pending']
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        
+        # Today's revenue
+        today_revenue_fc = Order.objects.filter(
+            food_court=food_court,
+            created_at__date=today,
+            status__in=['completed', 'ready', 'preparing', 'pending']
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        
+        # Yesterday's revenue
+        yesterday_revenue_fc = Order.objects.filter(
+            food_court=food_court,
+            created_at__date=yesterday,
+            status__in=['completed', 'ready', 'preparing', 'pending']
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        
+        # Calculate growth percentage
+        growth = 0
+        if yesterday_revenue_fc > 0:
+            growth = ((today_revenue_fc - yesterday_revenue_fc) / yesterday_revenue_fc) * 100
+        elif today_revenue_fc > 0:
+            growth = 100  # If no revenue yesterday but revenue today, 100% growth
+        
+        order_count = Order.objects.filter(
+            food_court=food_court,
+            status__in=['completed', 'ready', 'preparing', 'pending']
+        ).count()
+        
+        food_court_revenue.append({
+            'id': food_court.id,
+            'name': food_court.name,
+            'revenue': float(revenue),
+            'orders': order_count,
+            'growth': round(growth, 1)
+        })
+    
+    # Sort by revenue descending
+    food_court_revenue.sort(key=lambda x: x['revenue'], reverse=True)
     
     return Response({
         'total_revenue': total_revenue,
         'today_revenue': today_revenue,
         'total_orders': total_orders,
         'total_students': total_students,
-        'total_food_courts': total_food_courts
+        'total_food_courts': total_food_courts,
+        'food_court_revenue': food_court_revenue
     })

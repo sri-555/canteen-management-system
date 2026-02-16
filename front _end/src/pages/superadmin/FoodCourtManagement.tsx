@@ -39,6 +39,7 @@ export function FoodCourtManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourt, setSelectedCourt] = useState<FoodCourt | null>(null);
   const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
@@ -70,18 +71,27 @@ export function FoodCourtManagement() {
   const handleOpenModal = (court: FoodCourt) => {
     setSelectedCourt(court);
     setSelectedAdminId(court.admin.id);
+    setSelectedStatus(court.is_open);
     setIsModalOpen(true);
     setError('');
   };
 
-  const handleUpdateAdmin = async () => {
-    if (!selectedCourt || !selectedAdminId) return;
+  const handleUpdate = async () => {
+    if (!selectedCourt) return;
     
     setIsUpdating(true);
     setError('');
     
     try {
-      await api.superAdmin.updateFoodCourtAdmin(selectedCourt.id, selectedAdminId);
+      // Update admin if changed
+      if (selectedAdminId && selectedAdminId !== selectedCourt.admin.id) {
+        await api.superAdmin.updateFoodCourtAdmin(selectedCourt.id, selectedAdminId);
+      }
+      
+      // Update status if changed
+      if (selectedStatus !== selectedCourt.is_open) {
+        await api.superAdmin.updateFoodCourtStatus(selectedCourt.id, selectedStatus);
+      }
       
       // Refresh data
       await fetchData();
@@ -89,7 +99,7 @@ export function FoodCourtManagement() {
       setSelectedCourt(null);
       setSelectedAdminId(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to update admin');
+      setError(err.message || 'Failed to update food court');
     } finally {
       setIsUpdating(false);
     }
@@ -212,7 +222,7 @@ export function FoodCourtManagement() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={`Change Admin for ${selectedCourt?.name}`}
+        title={`Edit ${selectedCourt?.name}`}
       >
         <div className="space-y-4">
           {error && (
@@ -223,7 +233,56 @@ export function FoodCourtManagement() {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select New Admin
+              Food Court Status
+            </label>
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  checked={selectedStatus === true}
+                  onChange={() => setSelectedStatus(true)}
+                  className="mr-2"
+                />
+                <span className="text-sm">Open</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  checked={selectedStatus === false}
+                  onChange={() => setSelectedStatus(false)}
+                  className="mr-2"
+                />
+                <span className="text-sm">Closed</span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {selectedStatus ? 'Students can place orders' : 'Students cannot place orders'}
+            </p>
+          </div>
+
+          <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <User className="w-5 h-5 text-indigo-600 mr-2 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-indigo-900 mb-1">
+                  Current Admin Managing This Canteen
+                </p>
+                <p className="text-base text-indigo-800 font-bold mb-1">
+                  @{selectedCourt?.admin.username}
+                </p>
+                <p className="text-sm text-indigo-700">
+                  {selectedCourt?.admin.first_name} {selectedCourt?.admin.last_name}
+                </p>
+                <p className="text-xs text-indigo-600 mt-0.5">
+                  {selectedCourt?.admin.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Change Admin (Optional)
             </label>
             <select
               className="block w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -237,11 +296,9 @@ export function FoodCourtManagement() {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-            <strong>Current Admin:</strong> {selectedCourt?.admin.first_name}{' '}
-            {selectedCourt?.admin.last_name} ({selectedCourt?.admin.email})
+            <p className="text-xs text-gray-500 mt-1">
+              Leave unchanged to keep the current admin
+            </p>
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
@@ -253,10 +310,10 @@ export function FoodCourtManagement() {
               Cancel
             </Button>
             <Button
-              onClick={handleUpdateAdmin}
-              disabled={isUpdating || !selectedAdminId || selectedAdminId === selectedCourt?.admin.id}
+              onClick={handleUpdate}
+              disabled={isUpdating}
             >
-              {isUpdating ? 'Updating...' : 'Update Admin'}
+              {isUpdating ? 'Updating...' : 'Save Changes'}
             </Button>
           </div>
         </div>
