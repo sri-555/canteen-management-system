@@ -292,7 +292,8 @@ See `START_SERVERS.md` for scripts to run both servers simultaneously.
 SECRET_KEY=your-secret-key
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=sqlite:///db.sqlite3
+DATABASE_URL=mysql://root:S6r6i6***@localhost:3306/canteen
+
 ```
 
 ### Frontend (.env)
