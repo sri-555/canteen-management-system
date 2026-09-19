@@ -6,7 +6,7 @@ export function AuthLayout() {
   const isRegister = location.pathname === '/register';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex perspective-[2000px]">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex perspective-[2000px]">
       {/* Left Side - Branding with 3D effect */}
       <div
         className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-12 flex-col justify-between relative overflow-hidden"
@@ -72,7 +72,7 @@ export function AuthLayout() {
       </div>
 
       {/* Right Side - Form with 3D depth */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 min-h-0 flex items-center justify-center overflow-y-auto p-8 lg:p-12">
         <div className="w-full max-w-md lg:max-w-lg">
           <div className="lg:hidden flex justify-center mb-8">
             <div className="h-16 w-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl transform transition-all duration-500 hover:scale-110 hover:rotate-6">
