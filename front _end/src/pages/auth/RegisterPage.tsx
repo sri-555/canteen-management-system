@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Mail, Lock, User, AlertCircle, Phone } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, Phone, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export function RegisterPage() {
@@ -75,13 +75,13 @@ export function RegisterPage() {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center text-red-700 text-sm">
-          <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-          {error}
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start text-red-700 text-sm">
+          <AlertCircle className="h-5 w-5 mr-3 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="First Name"
           type="text"
@@ -114,22 +114,22 @@ export function RegisterPage() {
       />
 
       <Input
-        label="Email address"
+        label="Email Address"
         type="email"
         required
         value={formData.email}
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         icon={<Mail className="h-5 w-5" />}
-        placeholder="name@example.com"
+        placeholder="john@example.com"
       />
 
       <Input
-        label="Phone (optional, max 15 characters)"
+        label="Phone Number (Optional)"
         type="tel"
         value={formData.phone}
         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         icon={<Phone className="h-5 w-5" />}
-        placeholder="1234567890"
+        placeholder="+1 234 567 8900"
         maxLength={15}
       />
 
@@ -140,7 +140,7 @@ export function RegisterPage() {
         value={formData.password}
         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
         icon={<Lock className="h-5 w-5" />}
-        placeholder="••••••••"
+        placeholder="Create a strong password"
       />
 
       <Input
@@ -150,22 +150,42 @@ export function RegisterPage() {
         value={formData.confirmPassword}
         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
         icon={<Lock className="h-5 w-5" />}
-        placeholder="••••••••"
+        placeholder="Re-enter your password"
       />
 
-      <Button type="submit" className="w-full" isLoading={isLoading}>
-        Create Account
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+        <div className="flex items-start space-x-3">
+          <CheckCircle className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-indigo-900">
+            <p className="font-medium mb-1">Account Benefits:</p>
+            <ul className="space-y-1 text-indigo-700">
+              <li>• Quick and easy food ordering</li>
+              <li>• Track your order status in real-time</li>
+              <li>• Manage your digital wallet</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <Button type="submit" className="w-full group" size="lg" isLoading={isLoading}>
+        <span>Create Account</span>
+        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
       </Button>
 
-      <div className="text-center text-sm text-gray-600">
-        Already have an account?{' '}
-        <Link
-          to="/login"
-          className="font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          Sign in
-        </Link>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-4 bg-white text-gray-500">Already have an account?</span>
+        </div>
       </div>
+
+      <Link to="/login">
+        <Button type="button" variant="secondary" className="w-full" size="lg">
+          Sign in instead
+        </Button>
+      </Link>
     </form>
   );
 }

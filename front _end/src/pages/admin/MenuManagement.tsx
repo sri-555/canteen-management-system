@@ -49,7 +49,7 @@ export function MenuManagement() {
       // Get food court to get the ID
       const foodCourt = await api.admin.getFoodCourt() as any;
       setFoodCourtId(foodCourt.id);
-      
+
       // Get menu items
       const items = await api.admin.getMenuItems() as MenuItem[];
       setMenuItems(items);
@@ -78,7 +78,7 @@ export function MenuManagement() {
   const handleDelete = async (id: number) => {
     const item = menuItems.find(i => i.id === id);
     if (!item) return;
-    
+
     if (!confirm(`Are you sure you want to delete "${item.name}"? This action cannot be undone.`)) return;
 
     try {
@@ -98,53 +98,77 @@ export function MenuManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!foodCourtId) return;
+    if (!foodCourtId) {
+      alert('Food court ID not found. Please refresh the page.');
+      return;
+    }
 
     setSubmitting(true);
+    setError('');
+
     try {
       if (editingItem) {
         // Update existing item - only send changed fields
         const updateData: any = {
           name: formData.name,
           description: formData.description,
-          price: formData.price,
+          price: parseFloat(formData.price),
           category: formData.category,
           is_available: formData.is_available,
         };
-        
+
         // Only include image_url if it's not empty
         if (formData.image_url && formData.image_url.trim() !== '') {
           updateData.image_url = formData.image_url;
         }
-        
+
+        console.log('Updating item:', editingItem.id, updateData);
         const updated = await api.admin.updateMenuItem(editingItem.id, updateData) as MenuItem;
-        setMenuItems(menuItems.map((item) => 
+        setMenuItems(menuItems.map((item) =>
           item.id === editingItem.id ? updated : item
         ));
+
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        successMsg.textContent = `"${formData.name}" updated successfully`;
+        document.body.appendChild(successMsg);
+        setTimeout(() => successMsg.remove(), 3000);
       } else {
         // Create new item
         const createData: any = {
           name: formData.name,
           description: formData.description,
-          price: formData.price,
+          price: parseFloat(formData.price),
           category: formData.category,
           is_available: formData.is_available,
           food_court: foodCourtId,
         };
-        
+
         // Only include image_url if it's not empty
         if (formData.image_url && formData.image_url.trim() !== '') {
           createData.image_url = formData.image_url;
         }
-        
+
+        console.log('Creating item:', createData);
         const newItem = await api.admin.addMenuItem(createData) as MenuItem;
         setMenuItems([...menuItems, newItem]);
+
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        successMsg.textContent = `"${formData.name}" added successfully`;
+        document.body.appendChild(successMsg);
+        setTimeout(() => successMsg.remove(), 3000);
       }
-      
+
       setIsModalOpen(false);
       resetForm();
     } catch (err: any) {
-      alert('Failed to save item: ' + err.message);
+      console.error('Error saving item:', err);
+      const errorMessage = err.message || 'Failed to save item. Please try again.';
+      setError(errorMessage);
+      alert('Failed to save item: ' + errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -172,13 +196,13 @@ export function MenuManagement() {
         alert('Please select an image file');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('Image size should be less than 5MB');
         return;
       }
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -345,7 +369,7 @@ export function MenuManagement() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Item Image
             </label>
-            
+
             {imagePreview ? (
               <div className="relative">
                 <img

@@ -15,33 +15,33 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-  'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-semibold transition-all duration-300 focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed transform hover:translate-y-[-2px] active:translate-y-[0px] hover:shadow-xl active:shadow-lg';
   const variants = {
     primary:
-    'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 shadow-sm hover:shadow',
+      'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-700 hover:to-indigo-800 focus:ring-indigo-200 shadow-lg shadow-indigo-200/50',
     secondary:
-    'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 focus:ring-gray-200 shadow-sm',
+      'bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 focus:ring-gray-200 shadow-md',
     outline:
-    'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-300',
+      'bg-transparent border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-200 shadow-sm',
     ghost:
-    'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-200',
+      'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-200',
     danger:
-    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm'
+      'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-red-200 shadow-lg shadow-red-200/50',
   };
   const sizes = {
-    sm: 'h-8 px-3 text-xs rounded-lg',
-    md: 'h-10 px-4 text-sm rounded-xl',
-    lg: 'h-12 px-6 text-base rounded-xl',
-    icon: 'h-10 w-10 p-2 rounded-xl'
+    sm: 'h-9 px-4 text-sm rounded-xl',
+    md: 'h-11 px-5 text-sm rounded-xl',
+    lg: 'h-14 px-8 text-base rounded-2xl',
+    icon: 'h-11 w-11 p-2 rounded-xl',
   };
   return (
     <button
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || isLoading}
-      {...props}>
-
+      {...props}
+    >
       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children}
-    </button>);
-
+    </button>
+  );
 }

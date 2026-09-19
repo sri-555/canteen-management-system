@@ -251,19 +251,25 @@ class MenuItemViewSet(viewsets.ModelViewSet):
 @permission_classes([IsFoodCourtAdmin])
 def admin_food_court(request):
     try:
-        food_court = FoodCourt.objects.get(admin=request.user)
+        # Get the first food court assigned to this admin
+        food_court = FoodCourt.objects.filter(admin=request.user).first()
+        if not food_court:
+            return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
         serializer = FoodCourtDetailSerializer(food_court)
         return Response(serializer.data)
-    except FoodCourt.DoesNotExist:
-        return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PATCH'])
 @permission_classes([IsFoodCourtAdmin])
 def update_food_court(request):
     try:
-        food_court = FoodCourt.objects.get(admin=request.user)
-    except FoodCourt.DoesNotExist:
-        return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
+        # Get the first food court assigned to this admin
+        food_court = FoodCourt.objects.filter(admin=request.user).first()
+        if not food_court:
+            return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     allowed_fields = ['avg_preparation_time', 'active_staff_count', 'is_open', 'description']
     for field in allowed_fields:
@@ -278,9 +284,12 @@ def update_food_court(request):
 @permission_classes([IsFoodCourtAdmin])
 def admin_orders(request):
     try:
-        food_court = FoodCourt.objects.get(admin=request.user)
-    except FoodCourt.DoesNotExist:
-        return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
+        # Get the first food court assigned to this admin
+        food_court = FoodCourt.objects.filter(admin=request.user).first()
+        if not food_court:
+            return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     orders = Order.objects.filter(food_court=food_court)
     serializer = OrderSerializer(orders, many=True)
@@ -290,10 +299,15 @@ def admin_orders(request):
 @permission_classes([IsFoodCourtAdmin])
 def update_order_status(request, order_id):
     try:
-        food_court = FoodCourt.objects.get(admin=request.user)
+        # Get the first food court assigned to this admin
+        food_court = FoodCourt.objects.filter(admin=request.user).first()
+        if not food_court:
+            return Response({'error': 'No food court assigned'}, status=status.HTTP_404_NOT_FOUND)
         order = Order.objects.get(id=order_id, food_court=food_court)
-    except (FoodCourt.DoesNotExist, Order.DoesNotExist):
+    except Order.DoesNotExist:
         return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     new_status = request.data.get('status')
     if new_status not in ['pending', 'preparing', 'ready', 'completed', 'cancelled']:

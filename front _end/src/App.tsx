@@ -57,10 +57,10 @@ function CartDrawer() {
 
   const handleCheckout = async () => {
     if (!foodCourtId || items.length === 0) return;
-    
+
     setIsProcessing(true);
     setError('');
-    
+
     try {
       const orderData = {
         food_court: foodCourtId,
@@ -69,9 +69,9 @@ function CartDrawer() {
           quantity: item.quantity
         }))
       };
-      
+
       await api.student.placeOrder(orderData);
-      
+
       // Success - clear cart and navigate to orders
       clearCart();
       setIsOpen(false);
@@ -100,8 +100,8 @@ function CartDrawer() {
               <span>Total</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
-            <Button 
-              className="w-full" 
+            <Button
+              className="w-full"
               size="lg"
               onClick={handleCheckout}
               disabled={isProcessing}
@@ -112,21 +112,28 @@ function CartDrawer() {
 
       }>
 
-      {items.length === 0 ?
-      <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4">
+      {items.length === 0 ? (
+        <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4">
           <p>Your cart is empty</p>
-          <Button variant="secondary" onClick={() => setIsOpen(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setIsOpen(false);
+              navigate('/student');
+            }}
+          >
             Start Ordering
           </Button>
-        </div> :
-
-      <div className="space-y-6">
-          {items.map((item) =>
-        <div key={item.menuItem.id} className="flex gap-4">
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {items.map((item) => (
+            <div key={item.menuItem.id} className="flex gap-4">
               <img
-            src={item.menuItem.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}
-            alt={item.menuItem.name}
-            className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
+                src={item.menuItem.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'}
+                alt={item.menuItem.name}
+                className="w-20 h-20 rounded-lg object-cover bg-gray-100"
+              />
 
               <div className="flex-1">
                 <h4 className="font-medium text-gray-900">{item.menuItem.name}</h4>
@@ -138,26 +145,26 @@ function CartDrawer() {
                     Qty: {item.quantity}
                   </span>
                   <button
-                onClick={() => removeFromCart(item.menuItem.id)}
-                className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50">
-
+                    onClick={() => removeFromCart(item.menuItem.id)}
+                    className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
-        )}
+          ))}
           <Button
-          variant="ghost"
-          className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
-          onClick={clearCart}>
-
+            variant="ghost"
+            className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={clearCart}
+          >
             Clear Cart
           </Button>
         </div>
-      }
-    </Drawer>);
-
+      )}
+    </Drawer>
+  );
 }
 export function App() {
   return (
